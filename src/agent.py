@@ -83,22 +83,22 @@ FALLBACK_PROBLEM_TEMPLATES: Dict[str, Dict[str, str]] = {
     },
 }
 
-
 def _get_llm_client():
     """依序偵測環境變數中的可用 LLM 服務（優先地端 Ollama），皆無時回傳 None 啟動 Deterministic Fallback"""
     ollama_url = os.getenv("OLLAMA_BASE_URL", "").strip()
     if ollama_url:
-        from langchain_ollama import ChatOllama
-        ollama_model = os.getenv("OLLAMA_MODEL", "qwen2.5:7b").strip()
+        from langchain_openai import ChatOpenAI
+        ollama_model = os.getenv("OLLAMA_MODEL", "qwen3.5:4b").strip()
+        base_v1 = f"{ollama_url.rstrip('/')}/v1"
         return (
             f"Ollama ({ollama_model})",
-            ChatOllama(model=ollama_model, base_url=ollama_url, temperature=0.2),
+            ChatOpenAI(model=ollama_model, base_url=base_v1, api_key="ollama", temperature=0.2),
         )
 
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
     if gemini_key and gemini_key != "your_gemini_api_key_here":
         from langchain_google_genai import ChatGoogleGenerativeAI
-        gemini_model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
+        gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
         return (
             f"Gemini ({gemini_model})",
             ChatGoogleGenerativeAI(model=gemini_model, temperature=0.2),
